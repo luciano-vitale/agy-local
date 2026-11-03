@@ -24,6 +24,57 @@ from .translator import (
 
 PROXY_SERVICE_SIGNATURE = "agy-local-translation-proxy"
 
+DEFAULT_EXPERIMENTS_RESPONSE: dict[str, Any] = {
+    "experimentIds": [],
+    "flags": [
+        {"name": "enable-customization-skills", "boolValue": True},
+        {"name": "enable-customization-kind-skill", "boolValue": True},
+        {"name": "enable-customization-kind-rule", "boolValue": True},
+        {"name": "enable-customization-kind-hooks", "boolValue": True},
+        {"name": "enable-customization-kind-workflow", "boolValue": True},
+        {"name": "enable-customization-kind-plugin", "boolValue": True},
+        {"name": "enable-customization-kind-mcp", "boolValue": True},
+        {"name": "enable-customization-kind-agent", "boolValue": True},
+        {"name": "enable-markdown-agents", "boolValue": True},
+        {"name": "enable-learn-slash-command", "boolValue": True},
+        {"name": "enable-tasks", "boolValue": True},
+        {"name": "enable-ask-question-tool", "boolValue": True},
+        {"name": "enable-image-generator-subagent", "boolValue": True},
+        {"name": "send-subagent-initial-prompt-as-message", "boolValue": True},
+        {"name": "cascade-enable-messaging", "boolValue": True},
+        {"name": "json-hooks-enabled", "boolValue": True},
+        {"name": "mcp-lazy-load-tools", "boolValue": True},
+        {"name": "enable-ripgrep-path-search", "boolValue": True},
+        {"name": "enable-file-diff-accumulator", "boolValue": True},
+        {"name": "enable-sqlite-trajectory", "boolValue": True},
+        {"name": "show-model-selection-change", "boolValue": True},
+        {"name": "use-model-reported-token-count", "boolValue": True},
+        {"name": "disable-loop-detection", "boolValue": True},
+        {"name": "Chat__enable_agent_mode_slash_commands", "boolValue": True},
+        {"name": "Chat__enable_custom_prompts", "boolValue": True},
+        {"name": "DuetAICodeTransform__custom_slash_commands", "boolValue": True},
+        {"name": "customization-token-budget", "intValue": "20000"},
+        {"name": "rules-token-budget", "intValue": "20000"},
+        {"name": "max-tokens-per-step", "intValue": "16384"},
+        {"name": "tool-output-max-bytes", "intValue": "10240"},
+        {"name": "default_subagent_interaction_timeout_seconds", "intValue": "60"},
+        {"name": "max_injected_memories", "intValue": "-1"},
+        {"name": "max_injected_skills", "intValue": "-1"},
+        {
+            "name": "cascade-conversation-history-config",
+            "stringValue": '{"enabled": true, "max_conversations": 20}',
+        },
+        {
+            "name": "log-artifacts-config",
+            "stringValue": '{"enabled": true, "hideNominalToolSteps": false, "hidePlannerResponseText": false, "maxBytesPerStep": 4096, "maxBytesPerToolArg": 2048, "hideSystemSteps": false, "hideUserImplicitSteps": false}',
+        },
+        {
+            "name": "CASCADE_USE_REPLACE_CONTENT_EDIT_TOOL",
+            "stringValue": '{"max_fuzzy_edit_distance_fraction": 0.001, "allow_partial_replacement_success": true, "use_line_range": true, "fast_apply_fallback_config": {"enabled": false, "prompt_unchanged_threshold": 5, "content_view_radius_lines": 200, "content_edit_radius_lines": 5}}',
+        },
+    ],
+}
+
 
 def setup_logger() -> logging.Logger:
     logger = logging.getLogger("agy_local.proxy")
@@ -238,6 +289,10 @@ class TranslationProxyHandler(http.server.BaseHTTPRequestHandler):
 
         if "fetchUserInfo" in self.path:
             self._send_json(200, {"userSettings": {}, "regionCode": "IT"})
+            return
+
+        if "listExperiments" in self.path:
+            self._send_json(200, DEFAULT_EXPERIMENTS_RESPONSE)
             return
 
         if "countTokens" in self.path:

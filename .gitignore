@@ -1,5 +1,66 @@
+# Configurazioni locali per agenti AI (non distribuite)
+AGENTS.md
+CLAUDE.md
+docs/agents/
+.gemini/
+.agents/
+
+# Byte-compiled / cache / ambienti virtuali Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# Test, linting e coverage
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# File di sistema macOS e Linux
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+*~
+
+# IDE ed editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Log, segreti e file di stato temporanei
+*.log
+*.pid
+.env
+.env.*
+tmp/
+temp/

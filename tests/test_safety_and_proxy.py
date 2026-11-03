@@ -10,6 +10,7 @@ import urllib.request
 from pathlib import Path
 from unittest.mock import patch
 
+from agy_local.cli import cmd_install
 from agy_local.config import AgyLocalConfig
 from agy_local.model_host import DualModelRouter, LocalModelMetadata
 from agy_local.proxy import PROXY_SERVICE_SIGNATURE, TranslationProxyServer
@@ -87,9 +88,44 @@ class SafetyAndProxyTest(unittest.TestCase):
                 with urllib.request.urlopen(req, timeout=2) as r:
                     catalog = json.loads(r.read())
                 self.assertIn("qwen3.6-35b-a3b", catalog["models"])
+
+                exp_req = urllib.request.Request(
+                    f"http://127.0.0.1:{port}/v1internal:listExperiments",
+                    data=b"{}",
+                    method="POST",
+                )
+                with urllib.request.urlopen(exp_req, timeout=2) as r:
+                    experiments = json.loads(r.read())
+                flags_by_name = {f["name"]: f for f in experiments.get("flags", [])}
+                for required_bool_flag in (
+                    "enable-customization-skills",
+                    "enable-customization-kind-skill",
+                    "enable-customization-kind-rule",
+                    "enable-customization-kind-hooks",
+                    "enable-customization-kind-workflow",
+                    "enable-customization-kind-plugin",
+                    "enable-customization-kind-mcp",
+                    "enable-customization-kind-agent",
+                    "enable-markdown-agents",
+                ):
+                    self.assertIn(required_bool_flag, flags_by_name)
+                    self.assertTrue(flags_by_name[required_bool_flag].get("boolValue"))
+                self.assertEqual(flags_by_name["customization-token-budget"].get("intValue"), "20000")
+                self.assertEqual(flags_by_name["rules-token-budget"].get("intValue"), "20000")
+                self.assertEqual(flags_by_name["max_injected_skills"].get("intValue"), "-1")
             finally:
                 srv.shutdown()
                 srv.server_close()
+
+    def test_cmd_install_creates_symlink_in_target_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            bin_dir = Path(tmp) / "bin"
+            cfg = AgyLocalConfig()
+            rc = cmd_install(cfg, target_bin_dir=bin_dir)
+            self.assertEqual(rc, 0)
+            link = bin_dir / "agy-local"
+            self.assertTrue(link.is_symlink())
+            self.assertTrue(link.resolve().is_file())
 
 
 if __name__ == "__main__":

@@ -276,6 +276,63 @@ def cmd_logs(args: list[str]) -> int:
     return 0
 
 
+def cmd_install(config: AgyLocalConfig, target_bin_dir: Optional[Path] = None) -> int:
+    """Install the agy-local symlink into ~/.local/bin, verify PATH, and prepare agy-pinned."""
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    source_bin = repo_root / "bin" / "agy-local"
+    if not source_bin.is_file():
+        print(f"❌ Script eseguibile non trovato in '{source_bin}'.", file=sys.stderr)
+        return 1
+
+    source_bin.chmod(0o755)
+    dest_dir = target_bin_dir or (Path.home() / ".local" / "bin")
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_link = dest_dir / "agy-local"
+
+    if dest_link.is_symlink() or dest_link.exists():
+        dest_link.unlink()
+    dest_link.symlink_to(source_bin)
+
+    print(f"✅ Symlink creato: {dest_link} -> {source_bin}")
+
+    # Verify and pin the official agy binary
+    try:
+        resolved = resolve_safe_agy_binary()
+        print(f"✅ Binario ufficiale 'agy' verificato: {resolved.path}")
+        print(f"✅ Copia di sicurezza 'agy-pinned' pronta in: {get_pinned_agy_path()}")
+    except FailClosedSafetyError as err:
+        print(f"⚠️  {err}", file=sys.stderr)
+
+    # Create isolated settings file
+    local_settings = build_isolated_settings_file()
+    print(f"✅ Profilo impostazioni isolato pronto in: {local_settings}")
+
+    # Check PATH
+    path_entries = [Path(p).expanduser().resolve() for p in os.environ.get("PATH", "").split(os.pathsep) if p]
+    if dest_dir.resolve() not in path_entries:
+        print(
+            f"\n⚠️  La cartella '{dest_dir}' non è nel tuo PATH attuale.\n"
+            f"   Aggiungila eseguendo:\n"
+            f"   echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.zshrc && source ~/.zshrc"
+        )
+    else:
+        print(f"✅ '{dest_dir}' è già presente nel tuo PATH.")
+
+    # Check LM Studio status
+    router = DualModelRouter(lm_studio_url=config.lm_studio_url)
+    models = router.fetch_models(timeout=1.5)
+    if models:
+        print(f"✅ LM Studio raggiungibile su {config.lm_studio_url} ({len(models)} modelli LLM rilevati).")
+    else:
+        print(
+            f"ℹ️  LM Studio non risponde attualmente su {config.lm_studio_url}. "
+            "Avvia il server locale di LM Studio prima di eseguire 'agy-local'."
+        )
+
+    print("\nInstallazione completata! Ora puoi aprire un terminale ed eseguire: agy-local")
+    return 0
+
+
 def _extract_agy_local_flags(argv: list[str], config: AgyLocalConfig) -> list[str]:
     """Extract --aux-model and --lm-url flags meant for agy-local and return remaining agy args."""
     remaining: list[str] = []
@@ -352,6 +409,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             return cmd_aux(config, raw_args[1:])
         if cmd == "logs":
             return cmd_logs(raw_args[1:])
+        if cmd == "install":
+            return cmd_install(config)
 
     agy_args = _extract_agy_local_flags(raw_args, config)
 

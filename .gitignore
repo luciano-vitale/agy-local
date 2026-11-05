@@ -4,6 +4,10 @@ CLAUDE.md
 docs/agents/
 .gemini/
 .agents/
+.antigravity/
+.cursor/
+.cursorrules
+.windsurf/
 
 # Byte-compiled / cache / ambienti virtuali Python
 __pycache__/
@@ -47,6 +51,8 @@ htmlcov/
 .AppleDouble
 .LSOverride
 ._*
+.Spotlight-V100
+.Trashes
 *~
 
 # IDE ed editor
@@ -64,3 +70,4 @@ htmlcov/
 .env.*
 tmp/
 temp/
+scratch/

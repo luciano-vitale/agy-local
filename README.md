@@ -15,6 +15,8 @@ Grazie a questa architettura puoi tenere aperti due terminali dentro Google Anti
 - [Gestione del carico con il modello ausiliario](#gestione-del-carico-con-il-modello-ausiliario)
 - [Riferimento dei comandi CLI](#riferimento-dei-comandi-cli)
 - [Documentazione correlata](#documentazione-correlata)
+- [Autore](#autore)
+- [Licenza](#licenza)
 
 ---
 
@@ -167,3 +169,16 @@ agy-local aux off
 - [Manuale di installazione e utilizzo passo passo](docs/installazione.md)
 - [GLOSSARY.md](GLOSSARY.md) — glossario dei termini di dominio del progetto
 - [ADR 0001](docs/adr/0001-cloudcode-translation-proxy.md) — decisione architetturale sull'uso di `CLOUD_CODE_URL` e del Translation Proxy
+
+---
+
+## Autore
+
+Sviluppato da **Luciano Vitale** ([@luciano-vitale](https://github.com/luciano-vitale)).
+
+---
+
+## Licenza
+
+Distribuito sotto licenza MIT. Consulta il file [LICENSE](LICENSE) per tutti i dettagli.
+
